@@ -1,0 +1,141 @@
+#!usr/bin/python
+import sys, os
+import re, itertools, difflib, operator
+
+def open_directory(path):
+	#open the file and get all the file names
+	filelist = [os.path.normcase(f) for f in os.listdir(path)]
+	return filelist
+
+def find_length(filelist): 
+	# I picked a set to ensure no duplicates in lengthsetVariables occurs
+	lengthset = set()
+	for filename in filelist:
+		lengthset.add(len(filename))
+	return lengthset
+
+def split_into_hashes(filelist, lengthset): 
+	resulthash = {}
+	for le in lengthset:
+		#split the files into arrays depeding of thier length
+		resulthash[le] = [i for i in filelist if len(i) == le] 
+	return resulthash
+
+def get_results(hashes):
+	resullist = []
+	for key in hashes:
+		filelist = hashes[key]
+		#load a set at the time, the apply the regex for each set
+		resullist.append(regex_filename(filelist))
+	return resullist
+
+def group_results(ex_filelist):
+	hash_regxed_files = flaten_to_hash(ex_filelist)
+	print_results(hash_regxed_files, ex_filelist[1])
+
+def print_results(hash_regxed_files, numbers):
+	for key in hash_regxed_files:
+		count = len(hash_regxed_files[key][1])
+		file_range = hash_regxed_files[key][1]
+		if count >1:
+			file_range = files_range(file_range)
+		else:
+			file_range = ""
+		# file_range = sum(file_range)
+		filerange = "files range"
+		print("%s  %s                  %s" % (count, key, file_range))
+
+def files_range(numbers):
+	rangelist = ""
+	for k, g in itertools.groupby(enumerate(numbers), lambda (i,x):int(i)-int(x)):
+		result = map(operator.itemgetter(1), g)
+		rangelist += ("%s - %s   " % (result[0], result[len(result)-1]) )
+	return rangelist
+
+def flaten_to_hash(lists):
+	#flaten lists
+	hash_regxed_files = {}
+	flatlist = lists[:] 
+	flatlist = flatlist
+	for thelist in flatlist:
+		exset = set(thelist[0])
+		for key in exset:
+			hash_regxed_files[key] = [[item for item in flatlist if item == key], thelist[1]]
+	return hash_regxed_files
+
+
+def regex_filename(filelist):
+	numbers =[]
+	#copy the array first
+	copy_array = filelist[:] 
+	for index, filename in enumerate(copy_array):
+		length = len(copy_array)
+		#create fake index
+		custom_index = customize_index(index, length)
+		if custom_index:
+			current_file = regex_filename_results(filename)
+			#lets use the fake array here
+			next_file = regex_filename_results(copy_array[custom_index])
+			replaced_current = copy_array[index].replace(str(current_file[0][0]), replace_printf(current_file[0][1]))
+			replaced_next = copy_array[custom_index].replace(str(next_file[0][0]), replace_printf(current_file[0][1]))
+			if replaced_next == replaced_current:
+				filelist[index] = filelist[index].replace(str(current_file[0][0]), replace_printf(current_file[0][1]))
+				numbers.append(current_file[0][0])
+				# if int(current_file[0][0])-1 == int(next_file[0][0]) or int(current_file[0][0])+1 == int(next_file[0][0]):
+					
+				# if index == 0 and int(current_file[0][0])+1 == int(next_file[0][0]):
+				# 	filelist[index] = filelist[index].replace(str(current_file[0][0]), "%02d")
+
+			elif int(current_file[1][0])+1 == int(next_file[1][0]) or int(current_file[1][0])-1 == int(next_file[1][0]):		
+				last_chunck_file = copy_array[index][current_file[1][2]:len(filename)]
+				last_chunck_file = last_chunck_file.replace(current_file[1][0], replace_printf(current_file[1][1]))
+				filelist[index] = filelist[index][0:next_file[1][2]]+last_chunck_file
+				numbers.append(current_file[1][0])
+	return [filelist, numbers]
+			# elif replaced_next == replaced_current and int(current_file[1])+1 == int(next_file[0]):
+def replace_printf(number): 
+	if number > 2:
+		return "%"+str(number)+"d"
+	else:
+		return "%d"
+
+def regex_filename_results(filename):
+	#let's get all the numbers
+	result =[]
+	for m in re.finditer(r"\d+", filename):
+		numberlength = m.end() - m.start()
+		result.append([m.group(0), numberlength, m.start(), m.end()])
+	return result
+
+def customize_index(index, length):
+	if index > 0:
+		return index -1 
+	elif index == 0 and length > 1:
+		return index +1 
+
+def run():
+	#Where all the magic happens
+	if len(sys.argv) > 1 :
+		filepath = str(sys.argv[1])
+	else :
+		filepath = './'
+	filelist = open_directory(filepath)
+	lengthset = find_length(filelist)
+	hashes = split_into_hashes(filelist, lengthset)
+	filelist = get_results(hashes)
+	group_results(filelist)
+
+
+#touch files for testing 
+# ruby -e '107.upto(122) { |n| %x( touch "sd_fx29.0#{n}.txt" ) }'
+# ruby -e '124.upto(147) { |n| %x( touch "sd_fx29.0#{n}.txt" ) }'
+# ruby -e '40.upto(43) { |n| %x( touch "file01_00#{n}.rgb" ) }'
+# ruby -e '44.upto(47) { |n| %x( touch "file02_00#{n}.rgb" ) }'
+# ruby -e '1.upto(4) { |n| %x( touch "file1.03.rgb" ) }'
+# touch file.info.03.rgb
+# touch alpha.txt
+
+#now run the code, 
+run()
+
+
