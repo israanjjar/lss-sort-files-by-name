@@ -36,13 +36,13 @@ def group_results(ex_filelist):
 def print_results(hash_regxed_files, numbers):
 	for key in hash_regxed_files:
 		count = len(hash_regxed_files[key][1])
+		if count == 0:
+			count = 1
 		file_range = hash_regxed_files[key][1]
 		if count >1:
 			file_range = files_range(file_range)
 		else:
 			file_range = ""
-		# file_range = sum(file_range)
-		filerange = "files range"
 		print("%s  %s                  %s" % (count, key, file_range))
 
 def files_range(numbers):
@@ -74,28 +74,25 @@ def regex_filename(filelist):
 		custom_index = customize_index(index, length)
 		if custom_index:
 			current_file = regex_filename_results(filename)
-			#lets use the fake array here
-			next_file = regex_filename_results(copy_array[custom_index])
-			replaced_current = copy_array[index].replace(str(current_file[0][0]), replace_printf(current_file[0][1]))
-			replaced_next = copy_array[custom_index].replace(str(next_file[0][0]), replace_printf(current_file[0][1]))
-			if replaced_next == replaced_current:
-				filelist[index] = filelist[index].replace(str(current_file[0][0]), replace_printf(current_file[0][1]))
-				numbers.append(current_file[0][0])
-				# if int(current_file[0][0])-1 == int(next_file[0][0]) or int(current_file[0][0])+1 == int(next_file[0][0]):
-					
-				# if index == 0 and int(current_file[0][0])+1 == int(next_file[0][0]):
-				# 	filelist[index] = filelist[index].replace(str(current_file[0][0]), "%02d")
+			before_file = regex_filename_results(copy_array[custom_index])
+			replaced_next = regex_filename_results(copy_array[custom_index])
+			for ind, regexdnumberlist in enumerate(current_file):
 
-			elif int(current_file[1][0])+1 == int(next_file[1][0]) or int(current_file[1][0])-1 == int(next_file[1][0]):		
-				last_chunck_file = copy_array[index][current_file[1][2]:len(filename)]
-				last_chunck_file = last_chunck_file.replace(current_file[1][0], replace_printf(current_file[1][1]))
-				filelist[index] = filelist[index][0:next_file[1][2]]+last_chunck_file
-				numbers.append(current_file[1][0])
+				if index < length -1 and len(current_file) > 1:
+					after_file = regex_filename_results(copy_array[index+1])
+					replaced_next = copy_array[custom_index].replace(str(after_file[ind][0]), replace_printf(after_file[ind][1]))
+				replaced_current = copy_array[index].replace(str(regexdnumberlist[0]), replace_printf(regexdnumberlist[1]))
+				replaced_before = copy_array[custom_index].replace(str(before_file[ind][0]), replace_printf(before_file[ind][1]))
+				
+				if replaced_before == replaced_current or replaced_current == replaced_next:
+					filelist[index] = replaced_current
+					numbers.append(regexdnumberlist[0])
+						 
 	return [filelist, numbers]
-			# elif replaced_next == replaced_current and int(current_file[1])+1 == int(next_file[0]):
+
 def replace_printf(number): 
 	if number > 2:
-		return "%"+str(number)+"d"
+		return "%0"+str(number)+"d"
 	else:
 		return "%d"
 
