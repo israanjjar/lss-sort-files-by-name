@@ -35,6 +35,7 @@ def group_results(ex_filelist):
 		print_results(eachhash)
 
 def print_results(hash_regxed_files):
+	#print the results!
 	filerange = []
 	for key in hash_regxed_files:
 		count = 0 
@@ -56,27 +57,37 @@ def files_range(numbers):
 
 def regex_filename(filelist):
 	numbers =[]
-	#copy the array first
 	result = {}
-	copy_array = filelist[:] 
-	for index, filename in enumerate(copy_array):
-		length = len(copy_array)
-		if index < length -1 and len(copy_array) > 1:
+	#copy the array first
+	for index, filename in enumerate(filelist):
+		length = len(filelist)
+		if index < length -1 and len(filelist) > 1:
+			#run a regex on filenames, return an array of [number, len, start, end] 
 			current_file = regex_filename_results(filename)
-			after_file = regex_filename_results(copy_array[index+1])
+			after_file = regex_filename_results(filelist[index+1])
+
 			for ind, regexdnumberlist in enumerate(current_file):
-				replaced_current = copy_array[index].replace(str(regexdnumberlist[0]), replace_printf(regexdnumberlist[1]))
-				replaced_after = copy_array[index+1].replace(str(after_file[ind][0]), replace_printf(after_file[ind][1]))
-				if replaced_after != replaced_current: print replaced_current, replaced_after
+				#replace the file name the c style fprint formatting 
+				replaced_current = replace_filename(filelist[index], regexdnumberlist[0], regexdnumberlist[1])
+				replaced_after = replace_filename(filelist[index+1], after_file[ind][0], after_file[ind][1])
+				
+				#if the current element and the one after equal, add current to result
 				if replaced_after == replaced_current: 
 					if result.has_key(replaced_current) == False: result[replaced_current] = []
 					result[replaced_current].append([replaced_current, regexdnumberlist])
-					if result.has_key(replaced_after) == False: result[replaced_after] = []
-					print index
+
+					#only for the last element: 
+					#if this is the last item, we know already that it's equal lets add it then. 
 					if index == length -2: 
+						if result.has_key(replaced_after) == False: result[replaced_after] = []
 						result[replaced_after].append([replaced_after, after_file[ind]])
-		elif len(copy_array) == 1: result[filename] = [[filename]]
+
+		elif len(filelist) == 1: result[filename] = [[filename]]
 	return result
+
+def replace_filename(filename, numbers, replacewith):
+	cformatreplace = replace_printf(replacewith)
+	return filename.replace(str(numbers), cformatreplace)
 
 def replace_printf(number): 
 	if number > 2:
@@ -102,7 +113,6 @@ def run():
 	lengthset = find_length(filelist)
 	hashes = split_into_hashes(filelist, lengthset)
 	filelist = get_results(hashes)
-	print filelist
 	group_results(filelist)
 
 
