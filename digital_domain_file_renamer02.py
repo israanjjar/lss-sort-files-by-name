@@ -70,25 +70,22 @@ def regex_filename(filelist):
 	copy_array = filelist[:] 
 	for index, filename in enumerate(copy_array):
 		length = len(copy_array)
-		#create fake index
-		custom_index = customize_index(index, length)
-		if custom_index:
+		if index < length -1 and len(copy_array) > 1:
 			current_file = regex_filename_results(filename)
-			before_file = regex_filename_results(copy_array[custom_index])
-			replaced_next = regex_filename_results(copy_array[custom_index])
+			after_file = regex_filename_results(copy_array[index+1])
+			
 			for ind, regexdnumberlist in enumerate(current_file):
-
-				if index < length -1 and len(current_file) > 1:
-					after_file = regex_filename_results(copy_array[index+1])
-					replaced_next = copy_array[custom_index].replace(str(after_file[ind][0]), replace_printf(after_file[ind][1]))
 				replaced_current = copy_array[index].replace(str(regexdnumberlist[0]), replace_printf(regexdnumberlist[1]))
-				replaced_before = copy_array[custom_index].replace(str(before_file[ind][0]), replace_printf(before_file[ind][1]))
+				replaced_before = copy_array[index+1].replace(str(after_file[ind][0]), replace_printf(after_file[ind][1]))
 				
-				if replaced_before == replaced_current or replaced_current == replaced_next:
+				if replaced_before == replaced_current: 
 					filelist[index] = replaced_current
 					numbers.append(regexdnumberlist[0])
-						 
+					if index == length -2:
+						filelist[index+1] = replaced_current
+
 	return [filelist, numbers]
+
 
 def replace_printf(number): 
 	if number > 2:
