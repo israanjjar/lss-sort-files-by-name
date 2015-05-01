@@ -18,10 +18,10 @@ def regex_filename(filelist):
 			current_file = regex_filename_results(filename)
 			after_file = regex_filename_results(filelist[index+1])
 			if current_file == []: result[filename] = [[filename]]
-			hashedfiles = add_replaced(current_file, after_file, index, result, filelist)
+			hashedfiles = add_replaced(current_file, after_file, index, result, filelist, filename)
 	return hashedfiles
 
-def add_replaced(current_file, after_file, index, result, filelist):
+def add_replaced(current_file, after_file, index, result, filelist, filename):
 	if len(after_file) > 0 and len(current_file) > 0:
 		# print current_file
 		for ind, regexdnumberlist in enumerate(current_file):
@@ -32,8 +32,9 @@ def add_replaced(current_file, after_file, index, result, filelist):
 			#if the current element and the one after equal, add current to result
 			if replaced_after == replaced_current: 
 				result = match(result, replaced_current, replaced_after, regexdnumberlist, after_file, ind, filelist, index)
-			else : 
+			else: 
 				result = no_matches(result, index, ind, filelist, replaced_current, regexdnumberlist)
+				if len(current_file) == 1 and (result.has_key(replaced_current) == False ) : result[filename] = [filename]
 			#what if they are == ? Compare it to the one before it. 
 	return result
 
