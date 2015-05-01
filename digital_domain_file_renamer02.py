@@ -7,14 +7,61 @@ def open_directory(path):
 	filelist = [os.path.normcase(f) for f in os.listdir(path)]
 	return filelist
 
-def group_results(ex_filelist):
-	for eachhash in ex_filelist:
-		# ex_filelist[key] = [i for i in filelist if len(i) == le] 
-		print_results(eachhash)
+def regex_filename(filelist):
+	# print filelist
+	numbers =[]
+	result = {}
+	#copy the array first
+	for index, filename in enumerate(filelist):
+		if index < len(filelist) -1 :
+			#run a regex on filenames, return an array of [number, len, start, end] 
+			current_file = regex_filename_results(filename)
+			after_file = regex_filename_results(filelist[index+1])
+			if current_file == []: result[filename] = [[filename]]
+			hashedfiles = add_replaced(current_file, after_file, index, result, filelist)
+	return hashedfiles
+
+def add_replaced(current_file, after_file, index, result, filelist):
+	if len(after_file) > 0 and len(current_file) > 0:
+		# print current_file
+		for ind, regexdnumberlist in enumerate(current_file):
+				#replace the file name the c style fprint formatting 
+			replaced_current = replace_filename(filelist[index], regexdnumberlist[0], regexdnumberlist[1])
+			replaced_after = replace_filename(filelist[index+1], after_file[ind][0], after_file[ind][1])
+			
+			#if the current element and the one after equal, add current to result
+			if replaced_after == replaced_current: 
+				result = match(result, replaced_current, replaced_after, regexdnumberlist, after_file, ind, filelist, index)
+			else : 
+				result = no_matches(result, index, ind, filelist, replaced_current, regexdnumberlist)
+			#what if they are == ? Compare it to the one before it. 
+	return result
+
+def replace_filename(filename, numbers, replacewith):
+	cformatreplace = replace_printf(replacewith)
+	return filename.replace(str(numbers), cformatreplace)
+
+def no_matches(result, index, ind, filelist, replaced_current, regexdnumberlist):
+	if index-1 > -1: 
+		before_file = regex_filename_results(filelist[index-1])
+		if len(before_file) >1: 
+			replaced_before = replace_filename(filelist[index-1], before_file[ind][0], before_file[ind][1])
+			if replaced_current == replaced_before: result[replaced_current].append([replaced_current, regexdnumberlist])
+	return result
+
+def match(result, replaced_current, replaced_after, regexdnumberlist, after_file, ind, filelist, index):
+	if result.has_key(replaced_current) == False: result[replaced_current] = []
+	result[replaced_current].append([replaced_current, regexdnumberlist])
+	#only for the last element: 
+	#if this is the last item, we know already that it's equal lets add it then. 
+	if index == len(filelist) -2: 
+		if result.has_key(replaced_after) == False: result[replaced_after] = []
+		result[replaced_after].append([replaced_after, after_file[ind]])
+	return result
+
 
 def print_results(hash_regxed_files):
 	#print the results!
-	
 	for key in hash_regxed_files:
 		filerange = []
 		count = 0 
@@ -33,51 +80,6 @@ def files_range(numbers):
 		result = map(operator.itemgetter(1), g)
 		rangelist += ("%s - %s   " % (result[0], result[len(result)-1]) )
 	return rangelist
-
-def regex_filename(filelist):
-	# print filelist
-	numbers =[]
-	result = {}
-	#copy the array first
-	for index, filename in enumerate(filelist):
-
-		length = len(filelist)
-		if index < length -1 :
-			#run a regex on filenames, return an array of [number, len, start, end] 
-			current_file = regex_filename_results(filename)
-			after_file = regex_filename_results(filelist[index+1])
-			if current_file == []:
-				result[filename] = [[filename]]
-			if len(after_file) > 0 and len(current_file) > 0:
-				# print current_file
-				for ind, regexdnumberlist in enumerate(current_file):
-						#replace the file name the c style fprint formatting 
-						replaced_current = replace_filename(filelist[index], regexdnumberlist[0], regexdnumberlist[1])
-						replaced_after = replace_filename(filelist[index+1], after_file[ind][0], after_file[ind][1])
-						
-						#if the current element and the one after equal, add current to result
-						if replaced_after == replaced_current: 
-							if result.has_key(replaced_current) == False: result[replaced_current] = []
-							result[replaced_current].append([replaced_current, regexdnumberlist])
-
-							#only for the last element: 
-							#if this is the last item, we know already that it's equal lets add it then. 
-							if index == length -2: 
-								if result.has_key(replaced_after) == False: result[replaced_after] = []
-								result[replaced_after].append([replaced_after, after_file[ind]])
-						else : 
-						#what if they are == ? Compare it to the one before it. 
-							if index-1 > -1: 
-								before_file = regex_filename_results(filelist[index-1])
-								if len(before_file) >1: 
-									replaced_before = replace_filename(filelist[index-1], before_file[ind][0], before_file[ind][1])
-									if replaced_current == replaced_before:
-										result[replaced_current].append([replaced_current, regexdnumberlist])
-	return result
-
-def replace_filename(filename, numbers, replacewith):
-	cformatreplace = replace_printf(replacewith)
-	return filename.replace(str(numbers), cformatreplace)
 
 def replace_printf(number): 
 	if number > 2:
