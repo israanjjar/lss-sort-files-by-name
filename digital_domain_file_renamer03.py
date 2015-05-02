@@ -7,7 +7,6 @@ def open_directory(path):
 	filelist = [os.path.normcase(f) for f in os.listdir(path)]
 	return filelist
 
-
 def regex_filename(filelist):
 	# print filelist
 	numbers =[]
@@ -21,7 +20,6 @@ def regex_filename(filelist):
 			if current_file == []: result[filename] = [[filename]]
 			hashedfiles = add_replaced(current_file, after_file, index, result, filelist, filename)
 	return hashedfiles
-
 
 def add_replaced(current_file, after_file, index, result, filelist, filename):
 	if len(after_file) > 0 and len(current_file) > 0:
@@ -40,20 +38,17 @@ def add_replaced(current_file, after_file, index, result, filelist, filename):
 			#what if they are == ? Compare it to the one before it. 
 	return result
 
-
 def replace_filename(filename, numbers, replacewith):
 	cformatreplace = replace_printf(replacewith)
 	return filename.replace(str(numbers), cformatreplace)
 
-
 def no_matches(result, index, ind, filelist, replaced_current, regexdnumberlist):
 	if index-1 > -1: 
 		before_file = regex_filename_results(filelist[index-1])
-		if len(before_file) >0: 
+		if len(before_file) >1: 
 			replaced_before = replace_filename(filelist[index-1], before_file[ind][0], before_file[ind][1])
 			if replaced_current == replaced_before: result[replaced_current].append([replaced_current, regexdnumberlist])
 	return result
-
 
 def match(result, replaced_current, replaced_after, regexdnumberlist, after_file, ind, filelist, index):
 	if result.has_key(replaced_current) == False: result[replaced_current] = []
@@ -80,7 +75,6 @@ def print_results(hash_regxed_files):
 			file_range = ""
 		print("%s  %s                  %s" % (count, key, file_range))
 
-
 def files_range(numbers):
 	rangelist = ""
 	for k, g in itertools.groupby(enumerate(numbers), lambda (i,x):int(i)-int(x)):
@@ -88,13 +82,11 @@ def files_range(numbers):
 		rangelist += ("%s - %s   " % (result[0], result[len(result)-1]) )
 	return rangelist
 
-
 def replace_printf(number): 
 	if number > 2:
 		return "%0"+str(number)+"d"
 	else:
 		return "%d"
-
 
 def regex_filename_results(filename):
 	#let's get all the numbers
@@ -103,7 +95,6 @@ def regex_filename_results(filename):
 		numberlength = m.end() - m.start()
 		result.append([m.group(0), numberlength, m.start(), m.end()])
 	return result
-
 
 def run():
 	#Where all the magic happens
@@ -114,7 +105,6 @@ def run():
 	filelist = open_directory(filepath)
 	result = regex_filename(filelist)
 	printing = print_results(result)
-
 
 #now run the code, 
 run()
