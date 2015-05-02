@@ -2,6 +2,7 @@
 import sys, os
 import re, itertools, difflib, operator
 
+
 def open_directory(path):
 	#open the file and get all the file names
 	filelist = [os.path.normcase(f) for f in os.listdir(path)]
@@ -10,7 +11,6 @@ def open_directory(path):
 
 def regex_filename(filelist):
 	# print filelist
-	numbers =[]
 	result = {}
 	#copy the array first
 	for index, filename in enumerate(filelist):
@@ -19,8 +19,8 @@ def regex_filename(filelist):
 			current_file = regex_filename_results(filename)
 			after_file = regex_filename_results(filelist[index+1])
 			if current_file == []: result[filename] = [[filename]]
-			hashedfiles = add_replaced(current_file, after_file, index, result, filelist, filename)
-	return hashedfiles
+			result = add_replaced(current_file, after_file, index, result, filelist, filename)
+	return result
 
 
 def add_replaced(current_file, after_file, index, result, filelist, filename):
@@ -36,7 +36,7 @@ def add_replaced(current_file, after_file, index, result, filelist, filename):
 				result = match(result, replaced_current, replaced_after, regexdnumberlist, after_file, ind, filelist, index)
 			else: 
 				result = no_matches(result, index, ind, filelist, replaced_current, regexdnumberlist)
-				if len(current_file) == 1 and (result.has_key(replaced_current) == False ) : result[filename] = [filename]
+				if len(current_file) == 1 and not (result.has_key(replaced_current)) : result[filename] = [filename]
 			#what if they are == ? Compare it to the one before it. 
 	return result
 
@@ -56,12 +56,12 @@ def no_matches(result, index, ind, filelist, replaced_current, regexdnumberlist)
 
 
 def match(result, replaced_current, replaced_after, regexdnumberlist, after_file, ind, filelist, index):
-	if result.has_key(replaced_current) == False: result[replaced_current] = []
+	if not result.has_key(replaced_current): result[replaced_current] = []
 	result[replaced_current].append([replaced_current, regexdnumberlist])
 	#only for the last element: 
 	#if this is the last item, we know already that it's equal lets add it then. 
 	if index == len(filelist) -2: 
-		if result.has_key(replaced_after) == False: result[replaced_after] = []
+		if not result.has_key(replaced_after): result[replaced_after] = []
 		result[replaced_after].append([replaced_after, after_file[ind]])
 	return result
 
@@ -113,7 +113,7 @@ def run():
 		filepath = './'
 	filelist = open_directory(filepath)
 	result = regex_filename(filelist)
-	printing = print_results(result)
+	print_results(result)
 
 
 #now run the code, 
