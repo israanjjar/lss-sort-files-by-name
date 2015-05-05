@@ -7,9 +7,9 @@ import operator
 
 
 def open_directory(path):
-    # open the file and get all the file names
+    # 
     """
-
+    open the file from the given path retrun a list of all the files names
     :rtype : list
     """
     file_list = [os.path.normcase(f) for f in os.listdir(path)]
@@ -17,7 +17,6 @@ def open_directory(path):
 
 
 def regex_filename(file_list):
-    # print file list
     result = {}
     # copy the array first
     for index, filename in enumerate(file_list):
@@ -53,11 +52,12 @@ def add_replaced(current_file, after_file, index, result, file_list, filename):
 
 def replace_filename(filename, numbers, replace_with):
     """
+    replace the numbers in filename with a c style formatting 
+    example: file01_0040.rgb => file01_%04d.rgb 
 
-
-    :param filename: str
-    :param numbers: numbers in the string
-    :param replace_with: c style formatting string
+    :param filename: str File name before formatting 
+    :param numbers: str numbers in the string
+    :param replace_with: str c style formatting string
     :rtype : str
     """
     cformatreplace = replace_printf(replace_with)
@@ -65,6 +65,17 @@ def replace_filename(filename, numbers, replace_with):
 
 
 def no_matches(result, index, ind, file_list, replaced_current, regexdnumberlist):
+    """
+    replace the numbers in filename with a c style formatting
+    example: file01_0040.rgb => file01_%04d.rgb
+
+    :param result: dict File name before formatting
+    :param index: int numbers in the string
+    :param file_list: list c style formatting string
+    :param replaced_current: str c style formatting string
+    :param regexdnumberlist: list c style formatting string
+    :rtype : dict
+    """
     if index - 1 > -1:
         before_file = regex_filename_results(file_list[index - 1])
         if len(before_file) > 0:
@@ -101,7 +112,8 @@ def print_results(hash_regxed_files):
             file_range = files_range(file_range)
         else:
             file_range = ""
-        print("%s  %s                  %s" % (count, key, file_range))
+        # print("%s\t%s%s" % (count, key, file_range))
+        print '{0:<2} {1:>35} {2:>30}'.format(count, key, file_range)
 
 
 def files_range(numbers):
@@ -123,7 +135,7 @@ def regex_filename_results(filename):
     # let's get all the numbers
     """
 
-    :rtype : dict
+    :rtype : list
     """
     result = []
     for m in re.finditer(r"\d+", filename):
