@@ -18,7 +18,9 @@ alias lss='python ~/bin/lss.py'
 If you just want to run this code before installing it simply in your terminal navigate to the location of the script and run: 
 
 python lss.py
+
 or 
+
 python lss.py folder
 
 
